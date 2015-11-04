@@ -82,8 +82,9 @@ io.sockets.on('connection', function (socket) {
     socket.on('roomMessage', function(data){
 
       for(var name in clients){
-        console.log("If " + clients[name].room + " is " + data.room);
-        if(clients[name].room === data.room){
+        // If the clients are in the same room, send the message
+        // dont send the message to the sender
+        if(clients[name].room === data.room && clients[name].socket !== socket.id){
           io.to(clients[name].socket).emit('roomMessage', {"msg": data.msg, "sender": data.sender});
         }
       }
