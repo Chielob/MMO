@@ -1,32 +1,36 @@
 var express = require('express');
+var http = require('http');
 var path = require('path');
-var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-var routes = require('./routes/index');
-var game = require('./routes/game');
-
 var app = express();
+var server = http.createServer(app);
 var io = require('socket.io').listen(server);
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+server.listen(5000);
 
-
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+// setting up express
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', routes);
+// routing and viewengine setup
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
+
+// routing
+var index = require('./routes/index');
+var game = require('./routes/game');
+
+app.use('/', index);
 app.use('/game', game);
 
+// unknown page handler
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
@@ -58,9 +62,36 @@ app.use(function(err, req, res, next) {
   });
 });
 
-io.sockets.on('connection', function (socket){
-  console.log(socket);
-  socket.emit('world-message', {msg: 'The world is great :)'})
+//Object with all user data
+var clients = {};
+
+io.sockets.on('connection', function (socket) {
+
+    // when the client emits 'adduser', this listens and executes
+    socket.on('addUser', function(data){
+
+      clients[data.username] = {
+        "socket": socket.id,
+        "x": data.x,
+        "y": data.y
+      };
+
+    });
+
+    // when the user disconnects.. perform this
+    socket.on('disconnect', function(){
+
+      for(var name in clients) {
+        if(clients[name].socket === socket.id){
+
+          delete clients[name];
+          break;
+
+        }
+      }
+
+    });
 });
+
 
 module.exports = app;
