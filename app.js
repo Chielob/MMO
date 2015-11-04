@@ -73,8 +73,20 @@ io.sockets.on('connection', function (socket) {
       clients[data.username] = {
         "socket": socket.id,
         "x": data.x,
-        "y": data.y
+        "y": data.y,
+        "room": data.room
       };
+
+    });
+
+    socket.on('roomMessage', function(data){
+
+      for(var name in clients){
+        console.log("If " + clients[name].room + " is " + data.room);
+        if(clients[name].room === data.room){
+          io.to(clients[name].socket).emit('roomMessage', {"msg": data.msg, "sender": data.sender});
+        }
+      }
 
     });
 
