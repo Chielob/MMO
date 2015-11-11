@@ -1,3 +1,23 @@
-canvas{
-  border: 1px solid black;
+*{
+        box-sizing: border-box;
+}
+
+#loginBox{
+        top: 50%;
+        left: 50%;
+        display: block;
+        position: absolute;
+        width: 400px;
+        height: 400px;
+        margin-top: -200px;
+        margin-left: -200px;
+        background-color: rgba(0,0,0,0.75);
+        padding: 25px;
+        color: white;
+}
+
+#loginBox input{
+        width: 100%;
+        margin-bottom: 25px;
+        height: 40px;
 }

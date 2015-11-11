@@ -4,5 +4,9 @@ block content
   script(src='/socket.io/socket.io.js')
   script(src='/javascripts/client.js')
 
-  button(value="test" onclick="sendRoomMessage('Testbericht');")
-    Send message
+  textarea#message
+  button(onclick='sendRoomMessage()')
+    Send
+
+  div#messages
+  div#playerdata

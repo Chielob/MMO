@@ -1,5 +1,10 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+
+  #loginBox
+    h1= title
+    form(action="submit", method="GET")
+      input(type="text", placeholder="Username..")
+      input(type="password", placeholder="Password")
+      input(type="submit", value="Login")

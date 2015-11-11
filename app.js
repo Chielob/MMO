@@ -67,8 +67,10 @@ var clients = {};
 
 io.sockets.on('connection', function (socket) {
 
-    // when the client emits 'adduser', this listens and executes
+    //When the player joins and emits 'addUser' he will be added to the serverside clients object
     socket.on('addUser', function(data){
+
+      console.log("Player " + data.username + " connected!");
 
       clients[data.username] = {
         "socket": socket.id,
@@ -79,7 +81,11 @@ io.sockets.on('connection', function (socket) {
 
     });
 
+
+    //When player sends an roomMessage, emit the message to all other players in the same room except the sender
     socket.on('roomMessage', function(data){
+
+      console.log("Player " + data.sender + "said in room " + data.room + ": " + data.msg);
 
       for(var name in clients){
         // If the clients are in the same room, send the message
@@ -91,8 +97,39 @@ io.sockets.on('connection', function (socket) {
 
     });
 
-    // when the user disconnects.. perform this
+    //Change the position of the client in the serverside client object
+    //Send the new position to all other clients in the same room
+    socket.on('changePosition', function(data){
+
+      //Change the data serverside
+      clients[data.username] = {
+        x: data.x,
+        y: data.y
+      }
+
+      //Send the movement to all clients in the same room. Except to yourself ;)
+      for(var name in clients){
+        if(clients[name].room === data.room && clients[name].socket !== socket.id){
+          io.to(clients[name].socket).emit('changePosition', {"x": data.x, "y": data.y, "name": data.username})
+        }
+      }
+
+    });
+
+    //Change the room in the serverside clients object
+    socket.on('roomJoin', function(data){
+
+      console.log("Player" + data.username + "joined room: " + data.room);
+
+      clients[data.username] = {
+        room: data.room
+      }
+
+    });
+
+    // when the user disconnects delete it from the serverside Clients object
     socket.on('disconnect', function(){
+
 
       for(var name in clients) {
         if(clients[name].socket === socket.id){
@@ -105,6 +142,5 @@ io.sockets.on('connection', function (socket) {
 
     });
 });
-
 
 module.exports = app;
